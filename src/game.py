@@ -22,8 +22,9 @@ class Game:
         self._display_surf = pygame.display.set_mode(self.size, pygame.HWSURFACE | pygame.DOUBLEBUF)
         self._display_surf.blit(self.bg, (0,0))
 
-        self.player = Car()
-        self.groups['cars'] = pygame.sprite.Group([self.player])
+        self.player = Car(self)
+        self.AIs = [Car(self, True) for _ in range(3)]#[Car() for _ in range(100)]
+        self.groups['cars'] = pygame.sprite.Group([self.player, *self.AIs])
 
     def on_event(self, event):
         # print(event)
@@ -69,3 +70,26 @@ class Game:
             self.clock.tick(Game.FRAMERATE)
 
         self.on_cleanup()
+
+    def sensor_check_on_track(self, pos, facing, stop=100):
+        facing = facing.normalize()
+        left_looking = facing.rotate(-45)
+        right_looking = facing.rotate(45)
+        to_go = {"f": facing, "l": left_looking, "r": right_looking}
+        dist = {"f": stop, "l": stop, "r": stop}
+
+        for d in range(stop):
+            for i in to_go:
+                if not to_go[i]:
+                    continue
+                landed = pos+to_go[i]*d
+                landed_rounded = round(landed[0]), round(landed[1])
+                try:
+                    pixel = self._display_surf.get_at(landed_rounded)
+                    if pixel[0]:
+                        to_go[i] = False
+                        dist[i] = d
+                except IndexError:
+                    continue
+
+        return dist
