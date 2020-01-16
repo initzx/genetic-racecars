@@ -1,5 +1,9 @@
+import random
+import time
+
 import pygame
 
+from src.AI import AI
 from src.car import Car
 
 
@@ -12,6 +16,8 @@ class Game:
         self._bg = None
         self.size = self.width, self.height = 840, 600
         self.clock = pygame.time.Clock()
+        self.start = time.time()
+        self.max_ai_loop_time = 10
         self.groups = {}
 
     def _init(self):
@@ -20,11 +26,13 @@ class Game:
         pygame.init()
         self.bg = pygame.image.load('track.png')
         self._display_surf = pygame.display.set_mode(self.size, pygame.HWSURFACE | pygame.DOUBLEBUF)
-        self._display_surf.blit(self.bg, (0,0))
+        self._display_surf.blit(self.bg, (0, 0))
 
-        self.player = Car(self)
-        self.AIs = [Car(self, True) for _ in range(3)]#[Car() for _ in range(100)]
+        self.player = Car(self, None)
+        self.AIs = [Car(self, AI([3, 4])) for _ in range(20)]#[Car() for _ in range(100)]
+        self.groups['players'] = pygame.sprite.Group([self.player])
         self.groups['cars'] = pygame.sprite.Group([self.player, *self.AIs])
+        self.groups['AIs'] = pygame.sprite.Group(self.AIs)
 
     def on_event(self, event):
         # print(event)
@@ -33,8 +41,6 @@ class Game:
 
     def on_loop(self):
         keystate = pygame.key.get_pressed()
-        delta_vertical = (keystate[pygame.K_DOWN]-keystate[pygame.K_UP])
-        delta_horizontal = (keystate[pygame.K_RIGHT]-keystate[pygame.K_LEFT])
 
         if keystate[pygame.K_UP]:
             self.player.accelerate(1)
@@ -45,14 +51,23 @@ class Game:
         if keystate[pygame.K_LEFT]:
             self.player.steer(1)
 
-        for group in self.groups.values():
-            group.update()
+        self.groups['cars'].update()
+        self.groups['cars'].clear(self._display_surf, self.bg)
+        self.groups['cars'].draw(self._display_surf)
 
-        for group in self.groups.values():
-            group.clear(self._display_surf, self.bg)
-            group.draw(self._display_surf)
+        if time.time()-self.start > self.max_ai_loop_time:
+            for ai in self.AIs:
+                ai.die()
 
-        pygame.draw.line(self._display_surf, 234, [100,100], [100,100]+self.player.direction*100)
+        if self.groups['AIs']:
+            return
+
+        best_AIs = sorted(self.AIs, key=lambda ai: ai.alive_time, reverse=True)
+        mating_pool = {ai.alive_time: ai for ai in best_AIs[:5]}
+        for _ in range(len(self.AIs)):
+            partner_1 = self.select_random_cumulative(mating_pool)
+            partner_2 = self.select_random_cumulative(mating_pool)
+            print(partner_1, partner_2)
 
     def on_cleanup(self):
         pygame.quit()
@@ -91,5 +106,14 @@ class Game:
                         dist[i] = d
                 except IndexError:
                     continue
-
         return dist
+
+    def select_random_cumulative(self, pool):
+        max_val = sum(pool.keys())
+        selected = random.random()*max_val
+
+        c = 0
+        for val, cand in pool.items():
+            c += val
+            if c >= selected:
+                return cand
