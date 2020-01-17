@@ -32,7 +32,8 @@ class Game:
                 0: {'coords': [(540, 230), (630, 230)], 'points': 50},
                 1: {'coords': [(600, 450), (650, 523)], 'points': 10},
                 2: {'coords': [(175, 300), (250, 260)], 'points': 50},
-                3: {'coords': [(450, 330), (450, 415)], 'points': -120}
+                3: {'coords': [(450, 330), (450, 415)], 'points': 120},
+                4: {'coords': [(263, 500), (263, 580)], 'points': 20, 'special': 'speed'}
             }
         }
 
@@ -47,7 +48,7 @@ class Game:
         self._display_surf.blit(self.bg, (0, 0))
 
         self.player = Car(self, None)
-        self.AIs = [Car(self, AI([3, 4, 4])) for _ in range(20)] #[Car() for _ in range(100)] []
+        self.AIs = [Car(self, AI([4, 4])) for _ in range(20)] #[Car() for _ in range(100)] []
         self.groups['players'] = pygame.sprite.Group([self.player])
         self.groups['cars'] = pygame.sprite.Group([self.player, *self.AIs])
         self.groups['AIs'] = pygame.sprite.Group(self.AIs)
@@ -128,7 +129,7 @@ class Game:
         self._display_surf.blit(self.font.render('All time best', True, (0, 0, 0)), (10, 30))
         self._display_surf.blit(self.font.render(f'{self.all_time_best[0]}', True, self.all_time_best[1].color.rgb if self.all_time_best[1] else (0, 0, 0)), (10, 50))
 
-        for i in range(len(self.best_AIs)):
+        for i in range(min(len(self.best_AIs), 5)):
             text = self.font.render(f'{i+1}. {self.best_AIs[i].fitness}', True, self.best_AIs[i].color.rgb)
             self._display_surf.blit(text, (700, 30+(i+1)*15))
 
@@ -146,14 +147,16 @@ class Game:
         if self.groups['AIs']:
             return
 
-        self.best_AIs = sorted(self.AIs, key=lambda ai: ai.fitness, reverse=True)[:5]
+        self.best_AIs = sorted(self.AIs, key=lambda ai: ai.fitness, reverse=True)[:6]
         best_AI = self.best_AIs[0]
         if best_AI.fitness > self.all_time_best[0]:
             self.all_time_best = [best_AI.fitness, best_AI]
 
-        mating_pool = {ai: ai.fitness for ai in self.best_AIs}
-        if self.all_time_best[1]:
-            mating_pool[self.all_time_best[1]] = self.all_time_best[0]
+        mating_pool = [(ai, ai.fitness) for ai in self.best_AIs]
+        # if self.all_time_best[1]:
+        #     mating_pool.append((self.all_time_best[1], self.all_time_best[0]))
+
+        random.shuffle(mating_pool)
 
         new_gen = []
         for _ in range(len(self.AIs)):
@@ -168,11 +171,11 @@ class Game:
         self.start = time.time()
 
     def select_random_cumulative(self, pool):
-        max_val = sum(pool.values())
+        max_val = sum(i[1] for i in pool)
         selected = random.random()*max_val
 
         c = 0
-        for cand, val in pool.items():
+        for cand, val in pool:
             c += val
             if c >= selected:
                 return cand

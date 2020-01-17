@@ -17,6 +17,8 @@ class Car(pygame.sprite.Sprite):
     MAX_SPEED = 5
     STEERING = 5
 
+    LOOK = 100
+
     def __init__(self, game, AI, color=None, *groups):
         super().__init__(*groups)
         self.game = game
@@ -32,7 +34,7 @@ class Car(pygame.sprite.Sprite):
         self.goals = game.goals # {1: game.starting_line, 0: game.finish_line}
         self.checkpoints_reached = set()
 
-        self.track_center = pygame.Vector2(game.bg.get_rect().center)
+        self.speed_boost = False
 
         self.color = Color(tuple(np.random.randint(256, size=3))) if not color else color
         self.image = self.original = pygame.Surface([Car.HEIGHT, Car.WIDTH])
@@ -50,7 +52,7 @@ class Car(pygame.sprite.Sprite):
         return self.points
 
     def accelerate(self, f_or_b):
-        self.accel += f_or_b*self.direction*Car.ACCELERATION * (np.random.rand()+1)
+        self.accel += f_or_b*self.direction*Car.ACCELERATION
 
     def steer(self, r_or_l):
         self.angle += r_or_l*Car.STEERING * np.random.rand()*2
@@ -70,6 +72,8 @@ class Car(pygame.sprite.Sprite):
             friction = -self.speed.normalize()*Car.FRICTION * np.random.rand()*2
             self.accel += friction
             self.speed = self.speed.normalize()*max(-Car.MAX_SPEED, min(self.speed.length(), Car.MAX_SPEED))
+            if self.speed_boost:
+                self.speed *= 1.4
 
         self.speed += self.accel
         self.accel *= 0
@@ -99,20 +103,24 @@ class Car(pygame.sprite.Sprite):
                 self.points += start['points']
                 self.immunity = True
             elif not self.immunity:
-                self.points = 0
                 self.die()
 
         if self.immunity and not intersect(car_line, start['coords']):
             self.immunity = False
 
-        for goal in self.checkpoints_reached ^ set(checkpoints.keys()):
+        goals_to_go = self.checkpoints_reached ^ set(checkpoints.keys())
+        for goal in goals_to_go:
             if intersect(car_line, checkpoints[goal]['coords']):
                 self.checkpoints_reached.add(goal)
                 self.points += checkpoints[goal]['points']
+                special = checkpoints[goal].get('special')
+                if special == 'speed':
+                    self.speed_boost = True
 
     def _AI_control(self):
-        detection = self.game.sensor_check_on_track(self.rect.center, self.direction)
-        control = self.AI.feedforward_la(np.array([*detection.values()]))
+        detection = np.array((*self.game.sensor_check_on_track(self.rect.center, self.direction, Car.LOOK).values(),))
+        detection = detection/Car.LOOK
+        control = self.AI.feedforward_la(np.array([self.speed.length()/Car.MAX_SPEED, *detection]))
 
         steering = -1
         accelerate = -1
@@ -143,6 +151,6 @@ class Car(pygame.sprite.Sprite):
 def ccw(A,B,C):
     return (C[1]-A[1]) * (B[0]-A[0]) > (B[1]-A[1]) * (C[0]-A[0])
 
-# Return true if line segments AB and CD intersect
+
 def intersect(A, B):
     return ccw(A[0], B[0], B[1]) != ccw(A[1], B[0], B[1]) and ccw(A[0], A[1], B[0]) != ccw(A[0], A[1], B[1])
