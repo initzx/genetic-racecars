@@ -25,7 +25,7 @@ class Car(pygame.sprite.Sprite):
         self.alive_time = 0
         self.points = 0
         self.finishing_seq = [0, 1]
-        self.goals = {0: game.starting_line, 1: game.finish_line}
+        self.goals = {1: game.starting_line, 0: game.finish_line}
 
         self.image = self.original = pygame.Surface([Car.HEIGHT, Car.WIDTH])
         self.image.fill(Car.COLOR)

@@ -33,9 +33,9 @@ class AI:
             split_at = random.randint(0, len(f1))
 
             for i in range(len(f1)):
-                if random.random() < AI.MUTATION_RATE:
-                    child_chromosomes.append(np.random.randn())
-                    continue
+                # if random.random() < AI.MUTATION_RATE:
+                #     child_chromosomes.append(np.random.randn())
+                #     continue
 
                 child_chromosomes.append(f1[i] if i < split_at else f2[i])
 

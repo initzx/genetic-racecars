@@ -17,10 +17,10 @@ class Game:
         self.size = self.width, self.height = 840, 600
         self.clock = pygame.time.Clock()
         self.start = time.time()
-        self.max_ai_loop_time = 5
+        self.max_ai_loop_time = 10
         self.groups = {}
 
-        self.starting_line = [(400, 80), (400, 160)]
+        self.starting_line = [(360, 80), (360, 160)]
         self.finish_line = [(350, 80), (350, 160)]
 
     def _init(self):
@@ -32,7 +32,7 @@ class Game:
         self._display_surf.blit(self.bg, (0, 0))
 
         self.player = Car(self, None)
-        self.AIs = []#[Car(self, AI([3, 4])) for _ in range(20)]#[Car() for _ in range(100)]
+        self.AIs = [Car(self, AI([3, 4])) for _ in range(20)]#[Car() for _ in range(100)] []
         self.groups['players'] = pygame.sprite.Group([self.player])
         self.groups['cars'] = pygame.sprite.Group([self.player, *self.AIs])
         self.groups['AIs'] = pygame.sprite.Group(self.AIs)
@@ -112,24 +112,25 @@ class Game:
         if self.groups['AIs']:
             return
 
-        best_AIs = sorted(self.AIs, key=lambda ai: ai.alive_time, reverse=True)
-        mating_pool = {ai.alive_time: ai for ai in best_AIs[:5]}
+        best_AIs = sorted(self.AIs, key=lambda ai: ai.points, reverse=True)
+        mating_pool = {ai: ai.points for ai in best_AIs[:5]}
         new_gen = []
         for _ in range(len(self.AIs)):
             partner_1 = self.select_random_cumulative(mating_pool)
             partner_2 = self.select_random_cumulative(mating_pool)
-            new_gen.append(Car.cross_over(self, partner_1, partner_2))
+            child = Car.cross_over(self, partner_1, partner_2)
+            new_gen.append(child)
 
         self.AIs = new_gen
         self.groups['AIs'].add(*new_gen)
         self.groups['cars'].add(*new_gen)
 
     def select_random_cumulative(self, pool):
-        max_val = sum(pool.keys())
+        max_val = sum(pool.values())
         selected = random.random()*max_val
 
         c = 0
-        for val, cand in pool.items():
+        for cand, val in pool.items():
             c += val
             if c >= selected:
                 return cand
