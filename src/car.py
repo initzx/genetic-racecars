@@ -1,10 +1,9 @@
 import time
 
+import neat
 import numpy as np
 import pygame
-from colorutils import Color, ArithmeticModel
-
-from src.AI import AI
+from colorutils import Color
 
 
 class Car(pygame.sprite.Sprite):
@@ -19,10 +18,12 @@ class Car(pygame.sprite.Sprite):
 
     LOOK = 100
 
-    def __init__(self, game, AI, color=None, *groups):
+    def __init__(self, game, genome, color=None, *groups):
         super().__init__(*groups)
         self.game = game
-        self.AI = AI
+        self.genome = genome
+        genome.fitness = 0
+        self.net = neat.nn.FeedForwardNetwork.create(genome, game.neat_config)
         self.alive = True
 
         self.immunity = False
@@ -34,7 +35,7 @@ class Car(pygame.sprite.Sprite):
         self.goals = game.goals # {1: game.starting_line, 0: game.finish_line}
         self.checkpoints_reached = set()
 
-        self.speed_boost = False
+        self.specials = []
 
         self.color = Color(tuple(np.random.randint(256, size=3))) if not color else color
         self.image = self.original = pygame.Surface([Car.HEIGHT, Car.WIDTH])
@@ -49,7 +50,7 @@ class Car(pygame.sprite.Sprite):
 
     @property
     def fitness(self):
-        return self.points
+        return self.genome.fitness
 
     def accelerate(self, f_or_b):
         self.accel += f_or_b*self.direction*Car.ACCELERATION
@@ -62,18 +63,16 @@ class Car(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(center=self.rect.center)
 
     def update(self, *args, **kwargs):
-        if self.AI:
-            self._AI_control()
-        # else:
-            # print(pygame.Vector2(0,-1).angle_to(self.rect.center-self.track_center))
-            # pygame.draw.line(self.game._display_surf, 200, self.track_center, self.rect.center)
+        self._AI_control()
 
         if self.speed.length() != 0:
-            friction = -self.speed.normalize()*Car.FRICTION * np.random.rand()*2
+            friction = -self.speed.normalize()*Car.FRICTION #* np.random.rand()*2
             self.accel += friction
             self.speed = self.speed.normalize()*max(-Car.MAX_SPEED, min(self.speed.length(), Car.MAX_SPEED))
-            if self.speed_boost:
-                self.speed *= 1.4
+            if 'speed' in self.specials:
+                self.speed *= 2
+            if 'slowness' in self.specials:
+                self.speed *= 0.9
 
         self.speed += self.accel
         self.accel *= 0
@@ -94,15 +93,16 @@ class Car(pygame.sprite.Sprite):
         car_line = [self.rect.center, self.rect.center + self.direction * 20]
 
         if intersect(car_line, finish['coords']):
-            self.points += finish['points']
+            if not self.finished:
+                self.genome.fitness += finish['points']
             self.reached_goals = []
             self.finished = True
 
         if intersect(car_line, start['coords']):
             if self.finished:
-                self.points += start['points']
+                self.genome.fitness += start['points']
                 self.immunity = True
-            elif not self.immunity:
+            elif not self.finished:
                 self.die()
 
         if self.immunity and not intersect(car_line, start['coords']):
@@ -112,15 +112,14 @@ class Car(pygame.sprite.Sprite):
         for goal in goals_to_go:
             if intersect(car_line, checkpoints[goal]['coords']):
                 self.checkpoints_reached.add(goal)
-                self.points += checkpoints[goal]['points']
+                self.genome.fitness += checkpoints[goal]['points']
                 special = checkpoints[goal].get('special')
-                if special == 'speed':
-                    self.speed_boost = True
+                if special:
+                    self.specials.append(special)
 
     def _AI_control(self):
-        detection = np.array((*self.game.sensor_check_on_track(self.rect.center, self.direction, Car.LOOK).values(),))
-        detection = detection/Car.LOOK
-        control = self.AI.feedforward_la(np.array([self.speed.length()/Car.MAX_SPEED, *detection]))
+        f, l, r = self.game.sensor_check_on_track(self.rect.center, self.direction, Car.LOOK).values()
+        control = self.net.activate([self.speed.length(), f, l, r])
 
         steering = -1
         accelerate = -1
@@ -134,18 +133,9 @@ class Car(pygame.sprite.Sprite):
         self.steer(steering)
 
     def die(self):
-        if not self.AI:
-            return
-
         self.kill()
         self.alive = False
         self.alive_time = time.time() - self.game.start
-
-    @staticmethod
-    def cross_over(game, mate1, mate2):
-        child_AI = AI.cross_over(mate1.AI, mate2.AI)
-        child_color = mate1.color if not child_AI.mutated else None#Color(mate1.color, arithmetic_model=ArithmeticModel.BLEND) + mate2.color
-        return Car(game, child_AI, child_color)
 
 
 def ccw(A,B,C):
