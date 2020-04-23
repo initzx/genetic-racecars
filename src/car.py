@@ -18,12 +18,12 @@ class Car(pygame.sprite.Sprite):
 
     LOOK = 100
 
-    def __init__(self, game, genome, color=None, *groups):
+    def __init__(self, simulation, genome, color=None, *groups):
         super().__init__(*groups)
-        self.game = game
+        self.simulation = simulation
         self.genome = genome
         genome.fitness = 0
-        self.net = neat.nn.FeedForwardNetwork.create(genome, game.neat_config)
+        self.net = neat.nn.FeedForwardNetwork.create(genome, simulation.neat_config)
         self.alive = True
 
         self.immunity = False
@@ -32,7 +32,7 @@ class Car(pygame.sprite.Sprite):
         self.finishing_seq = [0, 1]
         self.finished = False
         self.previous_goal = None
-        self.goals = game.goals # {1: game.starting_line, 0: game.finish_line}
+        self.goals = simulation.goals # {1: game.starting_line, 0: game.finish_line}
         self.checkpoints_reached = set()
 
         self.specials = []
@@ -79,7 +79,7 @@ class Car(pygame.sprite.Sprite):
         self.rect.move_ip(self.speed)
 
         try:
-            if self.game.bg.get_at(self.rect.center)[0] == 255:
+            if self.simulation.map.get_at(self.rect.center)[0] == 255:
                 self.die()
         except IndexError:
             self.die()
@@ -118,7 +118,7 @@ class Car(pygame.sprite.Sprite):
                     self.specials.append(special)
 
     def _AI_control(self):
-        f, l, r = self.game.sensor_check_on_track(self.rect.center, self.direction, Car.LOOK).values()
+        f, l, r = self.simulation.sensor_check_on_track(self.rect.center, self.direction, Car.LOOK).values()
         control = self.net.activate([self.speed.length(), f, l, r])
 
         steering = -1
@@ -135,7 +135,7 @@ class Car(pygame.sprite.Sprite):
     def die(self):
         self.kill()
         self.alive = False
-        self.alive_time = time.time() - self.game.start
+        self.alive_time = time.time() - self.simulation.start
 
 
 def ccw(A,B,C):

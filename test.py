@@ -1,116 +1,39 @@
-import os
-from math import sin, radians, degrees, copysign
-
 import pygame
-from pygame.math import Vector2
+import pygame_gui
 
 
-class Car:
-    def __init__(self, x, y, angle=0.0, length=4, max_steering=100, max_acceleration=5.0):
-        self.position = Vector2(x, y)
-        self.velocity = Vector2(0.0, 0.0)
-        self.angle = angle
-        self.length = length
-        self.max_acceleration = max_acceleration
-        self.max_steering = max_steering
-        self.max_velocity = 20
-        self.brake_deceleration = 50
-        self.free_deceleration = 2
+pygame.init()
 
-        self.acceleration = 0.0
-        self.steering = 0.0
+pygame.display.set_caption('Quick Start')
+window_surface = pygame.display.set_mode((800, 600))
 
-    def update(self, dt):
-        self.velocity += (self.acceleration * dt, 0)
-        self.velocity.x = max(-self.max_velocity, min(self.velocity.x, self.max_velocity))
+background = pygame.Surface((800, 600))
+background.fill(pygame.Color('#000000'))
 
-        if self.steering:
-            turning_radius = self.length / sin(radians(self.steering))
-            angular_velocity = self.velocity.x / turning_radius
-        else:
-            angular_velocity = 0
+manager = pygame_gui.UIManager((500,600))
+hello_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((450, 175), (200, 500)),
+                                            text='Say Hello',
+                                            manager=manager)
 
-        self.position += self.velocity.rotate(-self.angle) * dt
-        print(degrees(angular_velocity) * dt)
+clock = pygame.time.Clock()
+is_running = True
 
-        self.angle += degrees(angular_velocity) * dt
+while is_running:
+    time_delta = clock.tick(60) / 1000.0
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            is_running = False
 
+        if event.type == pygame.USEREVENT:
+            if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
+                if event.ui_element == hello_button:
+                    print('Hello World!')
 
-class Game:
-    def __init__(self):
-        pygame.init()
-        pygame.display.set_caption("Car tutorial")
-        width = 1280
-        height = 720
-        self.screen = pygame.display.set_mode((width, height))
-        self.clock = pygame.time.Clock()
-        self.ticks = 60
-        self.exit = False
+        manager.process_events(event)
 
-    def run(self):
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        image_path = os.path.join(current_dir, "car.png")
-        car_image = pygame.image.load(image_path)
-        car = Car(0, 0)
-        ppu = 32
+    manager.update(time_delta)
 
-        while not self.exit:
-            dt = self.clock.get_time() / 1000
-            print(dt)
-            # Event queue
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    self.exit = True
+    window_surface.blit(background, (0, 0))
+    manager.draw_ui(window_surface)
 
-            # User input
-            pressed = pygame.key.get_pressed()
-
-            if pressed[pygame.K_UP]:
-                if car.velocity.x < 0:
-                    car.acceleration = car.brake_deceleration
-                else:
-                    car.acceleration += 1 * dt
-            elif pressed[pygame.K_DOWN]:
-                if car.velocity.x > 0:
-                    car.acceleration = -car.brake_deceleration
-                else:
-                    car.acceleration -= 1 * dt
-            elif pressed[pygame.K_SPACE]:
-                if abs(car.velocity.x) > dt * car.brake_deceleration:
-                    car.acceleration = -copysign(car.brake_deceleration, car.velocity.x)
-                else:
-                    car.acceleration = -car.velocity.x / dt
-            else:
-                if abs(car.velocity.x) > dt * car.free_deceleration:
-                    car.acceleration = -copysign(car.free_deceleration, car.velocity.x)
-                else:
-                    if dt != 0:
-                        car.acceleration = -car.velocity.x / dt
-            car.acceleration = max(-car.max_acceleration, min(car.acceleration, car.max_acceleration))
-
-            if pressed[pygame.K_RIGHT]:
-                car.steering -= 30 * dt
-            elif pressed[pygame.K_LEFT]:
-                car.steering += 30 * dt
-            else:
-                car.steering = 0
-            car.steering = max(-car.max_steering, min(car.steering, car.max_steering))
-
-            # Logic
-            car.update(dt)
-
-            # Drawing
-            self.screen.fill((0, 0, 0))
-            rotated = pygame.transform.rotate(car_image, car.angle)
-            print(car.angle)
-            rect = rotated.get_rect()
-            self.screen.blit(rotated, car.position * ppu - (rect.width / 2, rect.height / 2))
-            pygame.display.flip()
-
-            self.clock.tick(self.ticks)
-        pygame.quit()
-
-
-if __name__ == '__main__':
-    game = Game()
-    game.run()
+    pygame.display.update()

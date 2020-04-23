@@ -1,6 +1,5 @@
 import random
 import time
-from operator import truth
 
 import neat
 import pygame
@@ -15,8 +14,8 @@ class Game:
     def __init__(self):
         self._running = True
         self._display_surf = None
-        self._bg = None
-        self.size = self.width, self.height = 840, 600
+        self.map = None
+        self.size = self.width, self.height = 1200, 600
         self.clock = pygame.time.Clock()
         self.start = time.time()
         self.max_ai_loop_time = 20
@@ -54,9 +53,9 @@ class Game:
         pygame.init()
         pygame.font.init()
         self.font = pygame.font.SysFont('Ubuntu', 15)
-        self.bg = pygame.image.load('./tracks/track2.png')
+        self.map = pygame.image.load('./tracks/track2.png')
         self._display_surf = pygame.display.set_mode(self.size, pygame.HWSURFACE | pygame.DOUBLEBUF)
-        self._display_surf.blit(self.bg, (0, 0))
+        self._display_surf.blit(self.map, (0, 0))
 
         self.groups['cars'] = pygame.sprite.Group()
         self.groups['text'] = pygame.sprite.Group()
@@ -66,7 +65,6 @@ class Game:
             self.on_event(event)
 
     def check_stop(self):
-
         if not self.groups['cars'] or time.time()-self.start > self.max_ai_loop_time:
             for car in self.AIs:
                 car.die()
@@ -90,7 +88,7 @@ class Game:
         pygame.quit()
 
     def simulate(self, genomes, config):
-        self.AIs = [Car(self, genome) for genome_id, genome in genomes] #[Car() for _ in range(100)] []
+        self.AIs = [Car(self, genome) for genome_id, genome in genomes]
         self.groups['cars'].add(self.AIs)
         self.start = time.time()
 
@@ -137,7 +135,7 @@ class Game:
 
     def draw_cars(self):
         self.groups['cars'].update()
-        self.groups['cars'].clear(self._display_surf, self.bg)
+        self.groups['cars'].clear(self._display_surf, self.map)
         self.groups['cars'].draw(self._display_surf)
 
     def draw_stats(self):
@@ -157,47 +155,3 @@ class Game:
         for goal in goals:
             coords = goal['coords']
             pygame.draw.line(self._display_surf, 200, coords[0], coords[1])
-
-    def select_new_gen(self):
-        if time.time()-self.start > self.max_ai_loop_time:
-            for ai in self.AIs:
-                ai.die()
-
-        if self.groups['cars']:
-            return
-
-        self.best_AIs = sorted(self.AIs, key=lambda ai: ai.fitness, reverse=True)[:6]
-        best_AI = self.best_AIs[0]
-        if best_AI.fitness > self.all_time_best[0]:
-            self.all_time_best = [best_AI.fitness, best_AI]
-
-        if best_AI.fitness == 0:
-            new_gen = [Car(self, AI([4, 2, 4])) for _ in range(Game.AI_COUNT)]
-        else:
-            mating_pool = [(ai, ai.fitness) for ai in self.best_AIs]
-            # if self.all_time_best[1]:
-            #     mating_pool.append((self.all_time_best[1], self.all_time_best[0]))
-
-            random.shuffle(mating_pool)
-
-            new_gen = []
-            for _ in range(len(self.AIs)):
-                partner_1 = self.select_random_cumulative(mating_pool)
-                partner_2 = self.select_random_cumulative(mating_pool)
-                child = Car.cross_over(self, partner_1, partner_2)
-                new_gen.append(child)
-
-        self.AIs = new_gen
-        self.groups['cars'].add(*new_gen)
-        self.start = time.time()
-
-    def select_random_cumulative(self, pool):
-        max_val = sum(i[1] for i in pool)
-        selected = random.random()*max_val
-
-        c = 0
-        for cand, val in pool:
-            c += val
-            if c >= selected:
-                return cand
-
