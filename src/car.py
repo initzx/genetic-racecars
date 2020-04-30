@@ -12,11 +12,11 @@ class Car(pygame.sprite.Sprite):
     COLOR = 234
 
     FRICTION = 0.9
-    ACCELERATION = 1.2
+    ACCELERATION = 1.6
     MAX_SPEED = 5
-    STEERING = 5
+    STEERING = 8
 
-    LOOK = 100
+    LOOK = 400
 
     def __init__(self, simulation, genome, color=None, *groups):
         super().__init__(*groups)
@@ -32,7 +32,7 @@ class Car(pygame.sprite.Sprite):
         self.finishing_seq = [0, 1]
         self.finished = False
         self.previous_goal = None
-        self.goals = simulation.goals # {1: game.starting_line, 0: game.finish_line}
+        self.checkpoints = simulation.map_config.checkpoints # {1: game.starting_line, 0: game.finish_line}
         self.checkpoints_reached = set()
 
         self.specials = []
@@ -41,8 +41,9 @@ class Car(pygame.sprite.Sprite):
         self.image = self.original = pygame.Surface([Car.HEIGHT, Car.WIDTH])
         self.image.fill(self.color.rgb)
         self.image.set_colorkey((255, 0, 0))
+        pygame.draw.rect(self.image, 255, pygame.Rect((0, 0), (10, 5)))
 
-        self.rect = self.image.get_rect(center=(421, 115))
+        self.rect = self.image.get_rect(center=simulation.map_config.spawn_point)
         self.accel = pygame.Vector2(0, 0)
         self.speed = pygame.Vector2(0, 0)
         self.direction = self.original_dir = pygame.Vector2(1, 0)
@@ -87,9 +88,9 @@ class Car(pygame.sprite.Sprite):
         self.check_goals_1()
 
     def check_goals_1(self):
-        finish = self.goals['finish']
-        start = self.goals['start']
-        checkpoints = self.goals['checkpoints']
+        finish = self.checkpoints['finish']
+        start = self.checkpoints['start']
+        checkpoints = self.checkpoints['checkpoints']
         car_line = [self.rect.center, self.rect.center + self.direction * 20]
 
         if intersect(car_line, finish['coords']):
@@ -108,7 +109,7 @@ class Car(pygame.sprite.Sprite):
         if self.immunity and not intersect(car_line, start['coords']):
             self.immunity = False
 
-        goals_to_go = self.checkpoints_reached ^ set(checkpoints.keys())
+        goals_to_go = self.checkpoints_reached ^ set(checkpoints)
         for goal in goals_to_go:
             if intersect(car_line, checkpoints[goal]['coords']):
                 self.checkpoints_reached.add(goal)
