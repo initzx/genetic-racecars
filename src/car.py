@@ -56,7 +56,7 @@ class Car(pygame.sprite.Sprite):
         self.accel += f_or_b*self.direction*self.conf['acceleration']
 
     def steer(self, r_or_l):
-        self.angle += r_or_l*self.conf['steering'] * np.random.rand()*2
+        self.angle += r_or_l*self.conf['steering'] #* np.random.rand()*2
         self.angle %= 360
         self.direction = self.original_dir.rotate(-self.angle)
         self.image = pygame.transform.rotate(self.original, self.angle)

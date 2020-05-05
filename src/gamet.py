@@ -352,7 +352,20 @@ class Game:
         self.manager.process_events(event)
 
     def draw_stats(self, stats):
-        pass
+        if self.__dict__.get('stats'):
+            self.stats.kill()
+
+        self.stats = pygame_gui.elements.UITextBox(
+f"""
+<b>Generation: {stats['generation']}</b>
+<br>
+<p>Bedste point: {stats['max']:.0f}</p>
+<p>Bedste point nogensinde: {stats['max_all_time']:.0f}</p>
+<p>Population gennemsnit: {stats['avg']:.0f}</p>
+""",
+                  pygame.Rect((850, 300), (250, 200)),
+                  manager=self.manager,
+                  object_id="#text_box_2")
         # print(stats)
 
     def draw_surfaces(self):

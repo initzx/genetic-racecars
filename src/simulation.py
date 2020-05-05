@@ -6,6 +6,7 @@ from neat import CompleteExtinctionException
 from neat.six_util import iteritems, itervalues
 
 from src.car import Car
+from src.stats import StatsReporter
 
 
 class Simulation:
@@ -36,10 +37,7 @@ class Simulation:
 
     @property
     def stats(self):
-        st = {}
-        for car in self.cars:
-            st[car] = car.genome.fitness
-        return st
+        return self.stats_reporter.last_stats
 
     def kill_all(self):
         for car in self.cars:
@@ -48,8 +46,8 @@ class Simulation:
     def reset_population(self):
         self.kill_all()
         self.population = neat.Population(self.neat_config)
-        self.stats_reporter = neat.StatisticsReporter()
-        self.population.add_reporter(neat.StdOutReporter(True))
+        self.stats_reporter = StatsReporter()
+        # self.population.add_reporter(neat.StdOutReporter(False))
         self.population.add_reporter(self.stats_reporter)
 
     def update(self):
