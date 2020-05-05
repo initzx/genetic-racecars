@@ -85,28 +85,28 @@ class Game:
                                                       text='Start',
                                                       manager=self.manager)
         self.kill_btn = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((960, 30), (100, 30)),
-                                                     text='Kill all',
+                                                     text='Dræb alle',
                                                      manager=self.manager,
                                                      )
         self.stop_btn = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((850, 70), (100, 30)),
                                                      text='Stop',
                                                      manager=self.manager)
         self.paint_btn = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((960, 70), (100, 30)),
-                                                      text='Draw',
+                                                      text='Tegn bane',
                                                       manager=self.manager
                                                       )
         self.erase_btn = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((1070, 70), (100, 30)),
-                                                      text='Erase',
+                                                      text='Slet bane',
                                                       manager=self.manager
                                                       )
         self.new_checkpoint = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((1180, 70), (120, 30)),
-                                                           text='New Checkpoint',
+                                                           text='Ny Checkpoint',
                                                            manager=self.manager,
                                                            )
 
         pygame_gui.elements.UILabel(pygame.Rect((860, 120),
                                                 (150, 19)),
-                                    'Car controls',
+                                    'Bil styringer',
                                     self.manager)
 
         self.friction_slider = pygame_gui.elements.UIHorizontalSlider(
@@ -116,7 +116,7 @@ class Game:
                                                                     self.manager)
         pygame_gui.elements.UILabel(pygame.Rect((860, 153),
                                                                                 (150, 19)),
-                                                                                'Friction',
+                                                                                'Friktion',
                                                                                 self.manager)
 
         self.accel_slider = pygame_gui.elements.UIHorizontalSlider(
@@ -136,7 +136,7 @@ class Game:
                                                                     self.manager)
         pygame_gui.elements.UILabel(pygame.Rect((860, 213),
                                                                                 (150, 19)),
-                                                                                'Max Speed',
+                                                                                'Maks hastighed',
                                                                                 self.manager)
 
         self.steering_slider = pygame_gui.elements.UIHorizontalSlider(
@@ -146,7 +146,7 @@ class Game:
                                                                     self.manager)
         pygame_gui.elements.UILabel(pygame.Rect((860, 243),
                                                                                 (150, 19)),
-                                                                                'Steering',
+                                                                                'Drejningsevne',
                                                                                 self.manager)
 
         self.look_slider = pygame_gui.elements.UIHorizontalSlider(
@@ -156,7 +156,7 @@ class Game:
                                                                     self.manager)
         pygame_gui.elements.UILabel(pygame.Rect((860, 273),
                                                                                 (150, 19)),
-                                                                                'Sight distance',
+                                                                                'Syn afstand',
                                                                                 self.manager)
 
         pygame_gui.elements.UILabel(pygame.Rect((1060, 120),
@@ -170,12 +170,12 @@ class Game:
                                             self.manager)
         self.pop_size_label = pygame_gui.elements.UILabel(pygame.Rect((1060, 153),
                                                                                 (150, 19)),
-                                                                                f'Cars: {default_map_config.pop_size}',
+                                                                                f'Biler: {default_map_config.pop_size}',
                                                                                 self.manager)
 
         self.selected_press_mode = None
         self.load_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect(-200, -60, 100, 30),
-                                                        text='Load Map',
+                                                        text='Load bane',
                                                         manager=self.manager,
                                                         anchors={'left': 'right',
                                                                  'right': 'right',
@@ -183,7 +183,7 @@ class Game:
                                                                  'bottom': 'bottom'})
 
         self.save_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect(-300, -60, 100, 30),
-                                                        text='Save Map',
+                                                        text='Gem bane',
                                                         manager=self.manager,
                                                         anchors={'left': 'right',
                                                                  'right': 'right',

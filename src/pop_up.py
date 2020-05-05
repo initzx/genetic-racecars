@@ -3,34 +3,34 @@ import pygame_gui
 from pygame_gui.elements import UIWindow, UIHorizontalSlider, UILabel, UIDropDownMenu, UIButton
 
 options = {
-    'Default': 'checkpoints',
-    'Starting Line': 'start',
-    'Finish Line': 'finish',
+    'Normalt': 'checkpoints',
+    'Startlinje': 'start',
+    'Slutlinje': 'finish',
 }
 
 
 class CheckPoint(UIWindow):
     def __init__(self, rect, ui_manager, on_save):
         super().__init__(rect, ui_manager,
-                         window_display_title='Choose checkpoint type',
+                         window_display_title='Vælg checkpoint type',
                          object_id='#everything_window',
                          resizable=True)
         self.on_save = on_save
 
         self.type_text = UILabel(pygame.Rect((20, 50), (150, 25)),
-                                 'Checkpoint Type',
+                                 'Checkpoint type',
                                  self.ui_manager,
                                  container=self)
 
         self.cp_type_select = UIDropDownMenu(options.keys(),
-                                             'Default',
+                                             'Normalt',
                                              pygame.Rect((250, 50), (140, 25)),
                                              self.ui_manager,
                                              container=self)
 
         self.slider_text = UILabel(pygame.Rect((20, 100),
                                                (150, 25)),
-                                   'Checkpoint Point',
+                                   'Checkpoint point',
                                    self.ui_manager,
                                    container=self)
 
