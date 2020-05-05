@@ -21,11 +21,11 @@ class Car(pygame.sprite.Sprite):
     def __init__(self, simulation, genome, color=None, *groups):
         super().__init__(*groups)
         self.simulation = simulation
+        self.conf = simulation.map_config.car_config
         self.genome = genome
-        genome.fitness = 0
         self.net = neat.nn.FeedForwardNetwork.create(genome, simulation.neat_config)
         self.alive = True
-
+        genome.fitness = 0
         self.immunity = False
         self.alive_time = 0
         self.points = 0
@@ -41,9 +41,8 @@ class Car(pygame.sprite.Sprite):
         self.image = self.original = pygame.Surface([Car.HEIGHT, Car.WIDTH])
         self.image.fill(self.color.rgb)
         self.image.set_colorkey((255, 0, 0))
-        pygame.draw.rect(self.image, 255, pygame.Rect((0, 0), (10, 5)))
 
-        self.rect = self.image.get_rect(center=simulation.map_config.spawn_point)
+        self.rect = self.image.get_rect(center=simulation.starting_pos)
         self.accel = pygame.Vector2(0, 0)
         self.speed = pygame.Vector2(0, 0)
         self.direction = self.original_dir = pygame.Vector2(1, 0)
@@ -54,10 +53,10 @@ class Car(pygame.sprite.Sprite):
         return self.genome.fitness
 
     def accelerate(self, f_or_b):
-        self.accel += f_or_b*self.direction*Car.ACCELERATION
+        self.accel += f_or_b*self.direction*self.conf['acceleration']
 
     def steer(self, r_or_l):
-        self.angle += r_or_l*Car.STEERING * np.random.rand()*2
+        self.angle += r_or_l*self.conf['steering'] * np.random.rand()*2
         self.angle %= 360
         self.direction = self.original_dir.rotate(-self.angle)
         self.image = pygame.transform.rotate(self.original, self.angle)
@@ -65,18 +64,21 @@ class Car(pygame.sprite.Sprite):
 
     def update(self, *args, **kwargs):
         self._AI_control()
+        self.check_goals()
 
         if self.speed.length() != 0:
-            friction = -self.speed.normalize()*Car.FRICTION #* np.random.rand()*2
+            normalized = self.speed.normalize()
+            friction = -normalized*self.conf['friction'] #* np.random.rand()*2
             self.accel += friction
-            self.speed = self.speed.normalize()*max(-Car.MAX_SPEED, min(self.speed.length(), Car.MAX_SPEED))
-            if 'speed' in self.specials:
-                self.speed *= 2
-            if 'slowness' in self.specials:
-                self.speed *= 0.9
+            # if 'speed' in self.specials:
+            #     self.speed *= 2
+            # if 'slowness' in self.specials:
+            #     self.speed *= 0.9
 
         self.speed += self.accel
         self.accel *= 0
+        self.speed = self.speed.normalize() * max(-self.conf['max_speed'],
+                                                  min(self.speed.length(), self.conf['max_speed']))
         self.rect.move_ip(self.speed)
 
         try:
@@ -85,13 +87,11 @@ class Car(pygame.sprite.Sprite):
         except IndexError:
             self.die()
 
-        self.check_goals_1()
-
-    def check_goals_1(self):
+    def check_goals(self):
         finish = self.checkpoints['finish']
         start = self.checkpoints['start']
         checkpoints = self.checkpoints['checkpoints']
-        car_line = [self.rect.center, self.rect.center + self.direction * 20]
+        car_line = [self.rect.center, self.rect.center + self.direction * 7]
 
         if intersect(car_line, finish['coords']):
             if not self.finished:
@@ -100,7 +100,7 @@ class Car(pygame.sprite.Sprite):
             self.finished = True
 
         if intersect(car_line, start['coords']):
-            if self.finished:
+            if self.finished and not self.immunity:
                 self.genome.fitness += start['points']
                 self.immunity = True
             elif not self.finished:
@@ -108,18 +108,16 @@ class Car(pygame.sprite.Sprite):
 
         if self.immunity and not intersect(car_line, start['coords']):
             self.immunity = False
+            self.finished = False
 
         goals_to_go = self.checkpoints_reached ^ set(checkpoints)
         for goal in goals_to_go:
             if intersect(car_line, checkpoints[goal]['coords']):
                 self.checkpoints_reached.add(goal)
                 self.genome.fitness += checkpoints[goal]['points']
-                special = checkpoints[goal].get('special')
-                if special:
-                    self.specials.append(special)
 
     def _AI_control(self):
-        f, l, r = self.simulation.sensor_check_on_track(self.rect.center, self.direction, Car.LOOK).values()
+        f, l, r = self.simulation.sensor_check_on_track(self.rect.center, self.direction, self.conf['look']).values()
         control = self.net.activate([self.speed.length(), f, l, r])
 
         steering = -1

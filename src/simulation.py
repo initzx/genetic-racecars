@@ -20,6 +20,11 @@ class Simulation:
         self.reset_population()
 
     @property
+    def starting_pos(self):
+        a, b = self.map_config.checkpoints['start']['coords']
+        return (a[0]+b[0])/2, (a[1]+b[1])/2,
+
+    @property
     def generation_over(self):
         if time.time() - self.start > self.map_config.max_loop_time:
             self.kill_all()

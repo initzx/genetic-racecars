@@ -15,9 +15,4 @@ def save_map(name, game):
 
 class MapConfig:
     def __init__(self, **kwargs):
-        self.map = kwargs.get('map')
-        self.map_path = kwargs.get('map_path')
-        self.checkpoints = kwargs.get('checkpoints')
-        self.spawn_point = kwargs.get('spawn_point')
-        self.cars = kwargs.get('cars')
-        self.max_loop_time = kwargs.get('max_loop_time')
+        self.__dict__.update(kwargs)

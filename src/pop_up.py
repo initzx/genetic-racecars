@@ -22,7 +22,7 @@ class CheckPoint(UIWindow):
                                  self.ui_manager,
                                  container=self)
 
-        self.test_drop_down = UIDropDownMenu(options.keys(),
+        self.cp_type_select = UIDropDownMenu(options.keys(),
                                              'Default',
                                              pygame.Rect((250, 50), (140, 25)),
                                              self.ui_manager,
@@ -34,7 +34,7 @@ class CheckPoint(UIWindow):
                                    self.ui_manager,
                                    container=self)
 
-        self.test_slider = UIHorizontalSlider(
+        self.point_slider = UIHorizontalSlider(
             pygame.Rect((250, 100), (140, 25)),
             50.0,
             (-50, 100.0),
@@ -43,7 +43,7 @@ class CheckPoint(UIWindow):
 
         self.slider_label = UILabel(pygame.Rect((400, 100),
                                                 (27, 25)),
-                                    str(int(self.test_slider.get_current_value())),
+                                    str(int(self.point_slider.get_current_value())),
                                     self.ui_manager,
                                     container=self)
         self.save_button = UIButton(pygame.Rect((300, 150),
@@ -57,13 +57,13 @@ class CheckPoint(UIWindow):
     def update(self, time_delta):
         super().update(time_delta)
 
-        if self.alive() and self.test_slider.has_moved_recently:
-            self.slider_label.set_text(str(int(self.test_slider.get_current_value())))
+        if self.alive() and self.point_slider.has_moved_recently:
+            self.slider_label.set_text(str(int(self.point_slider.get_current_value())))
 
     def process_event(self, event: pygame.event.Event) -> bool:
         processed = super().process_event(event)
 
         if event.type == pygame.USEREVENT:
             if event.user_type == pygame_gui.UI_BUTTON_PRESSED and event.ui_element == self.save_button:
-                self.on_save(self.test_slider.get_current_value(), options[self.test_drop_down.selected_option])
+                self.on_save(self.point_slider.get_current_value(), options[self.cp_type_select.selected_option])
                 self.kill()
