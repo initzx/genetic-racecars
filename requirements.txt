@@ -1,3 +1,7 @@
 colorutils==0.2.1
+neat-python==0.92
 numpy==1.18.1
 pygame==2.0.0.dev6
+pygame-gui==0.5.5
+thorpy==1.6.3
+WebOb==1.8.5

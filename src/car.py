@@ -68,7 +68,7 @@ class Car(pygame.sprite.Sprite):
 
         if self.speed.length() != 0:
             normalized = self.speed.normalize()
-            friction = -normalized*self.conf['friction'] #* np.random.rand()*2
+            friction = -normalized*self.conf['friction'] * np.random.rand()*2
             self.accel += friction
             # if 'speed' in self.specials:
             #     self.speed *= 2
