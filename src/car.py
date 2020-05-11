@@ -107,15 +107,15 @@ class Car(pygame.sprite.Sprite):
 
     def _AI_control(self):
         f, l, r = self.simulation.sensor_check_on_track(self.rect.center, self.direction, self.conf['look']).values()
-        control = self.net.activate([self.speed.length(), f, l, r])
+        control = self.net.activate([self.speed.length(), self.accel.length(), self.conf['friction'], f, l, r])
 
         steering = -1
         accelerate = -1
         if control[0] < control[-1]:
-            steering = 1
+            steering = 1  # hvis den første neuron har en mindre værdi end den anden, så drej til højre
 
         if control[2] < control[3]:
-            accelerate = 1
+            accelerate = 1  # hvis den tredje neuron har en mindre værdi end den fjerde, så accelerere
 
         self.accelerate(accelerate)
         self.steer(steering)
