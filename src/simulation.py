@@ -23,7 +23,7 @@ class Simulation:
     @property
     def starting_pos(self):
         a, b = self.map_config.checkpoints['start']['coords']
-        return (a[0]+b[0])/2, (a[1]+b[1])/2,
+        return (a[0]+b[0])/2+5, (a[1]+b[1])/2,
 
     @property
     def generation_over(self):
@@ -47,7 +47,6 @@ class Simulation:
         self.kill_all()
         self.population = neat.Population(self.neat_config)
         self.stats_reporter = StatsReporter()
-        # self.population.add_reporter(neat.StdOutReporter(False))
         self.population.add_reporter(self.stats_reporter)
 
     def update(self):
@@ -72,10 +71,12 @@ class Simulation:
 
     def start_generation(self):
         self.population.reporters.start_generation(self.population.generation)
-        self.cars.add([Car(self, genome) for genome_id, genome in list(iteritems(self.population.population))])
+        self.cars.add([Car(self, self.map_config.car_config, genome) for genome_id, genome in list(iteritems(self.population.population))])
         self.start = time.time()
 
     def reproduce(self):
+        # Koden her er taget fra NEAT-Python
+
         best = None
 
         for g in itervalues(self.population.population):

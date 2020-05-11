@@ -7,21 +7,10 @@ from colorutils import Color
 
 
 class Car(pygame.sprite.Sprite):
-    WIDTH = 10
-    HEIGHT = 15
-    COLOR = 234
-
-    FRICTION = 0.9
-    ACCELERATION = 1.6
-    MAX_SPEED = 5
-    STEERING = 8
-
-    LOOK = 400
-
-    def __init__(self, simulation, genome, color=None, *groups):
+    def __init__(self, simulation, car_config, genome, color=None, *groups):
         super().__init__(*groups)
         self.simulation = simulation
-        self.conf = simulation.map_config.car_config
+        self.conf = car_config
         self.genome = genome
         self.net = neat.nn.FeedForwardNetwork.create(genome, simulation.neat_config)
         self.alive = True
@@ -38,7 +27,7 @@ class Car(pygame.sprite.Sprite):
         self.specials = []
 
         self.color = Color(tuple(np.random.randint(256, size=3))) if not color else color
-        self.image = self.original = pygame.Surface([Car.HEIGHT, Car.WIDTH])
+        self.image = self.original = pygame.Surface([15, 10])
         self.image.fill(self.color.rgb)
         self.image.set_colorkey((255, 0, 0))
 

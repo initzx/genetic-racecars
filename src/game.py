@@ -5,10 +5,15 @@ import pygame
 import pygame_gui
 from pygame_gui.core.utility import create_resource_path
 
-from src.map_loader import MapConfig
 from src.paint_modes import PaintMode
-from src.pop_up import CheckPoint
+from src.pop_up import CheckPoint, HelpText
 from src.simulation import Simulation
+
+
+class MapConfig:
+    def __init__(self, **kwargs):
+        self.__dict__.update(kwargs)
+
 
 default_map_config = MapConfig(
     map=pygame.image.load('./tracks/track2.png'),
@@ -56,13 +61,13 @@ class Game:
 
         self._stopped = False
         self._stop_simulation = False
-        self._paint_mode = False
+        self._paint_mode = True
         self._load_mode = False
 
         self._init_surfs()
         self._init_simul()
         self._init_controls()
-        self.game_mode()
+        # self.game_mode()
 
     def _init_surfs(self):
         self.display_surf = pygame.display.set_mode(self.size, pygame.HWSURFACE | pygame.DOUBLEBUF)
@@ -76,12 +81,12 @@ class Game:
     def _init_controls(self):
         # self.side_menu = SideMenu(self)
         self.manager = pygame_gui.UIManager(self.display_surf.get_size())
-
-        self.start_btn = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((850, 30), (100, 30)),
-                                                      text='Start',
-                                                      manager=self.manager,
-                                                      tool_tip_text='Start simulationen'
-                                                      )
+        HelpText(pygame.Rect((850, 30), (600, 400)), self.manager)
+        # self.start_btn = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((850, 30), (100, 30)),
+        #                                               text='Start',
+        #                                               manager=self.manager,
+        #                                               tool_tip_text='Start simulationen'
+        #                                               )
         self.kill_btn = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((960, 30), (100, 30)),
                                                      text='Dræb alle',
                                                      manager=self.manager,
@@ -92,11 +97,11 @@ class Game:
                                                      manager=self.manager,
                                                      tool_tip_text='Dræb alle biler og start populationen om igen'
                                                      )
-        self.stop_btn = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((850, 70), (100, 30)),
-                                                     text='Stop',
-                                                     manager=self.manager,
-                                                     tool_tip_text='Stop simulationen øjeblikkeligt'
-                                                     )
+        # self.stop_btn = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((850, 70), (100, 30)),
+        #                                              text='Stop',
+        #                                              manager=self.manager,
+        #                                              tool_tip_text='Stop simulationen øjeblikkeligt'
+        #                                              )
         self.paint_btn = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((960, 70), (100, 30)),
                                                       text='Tegn bane',
                                                       manager=self.manager,
@@ -196,8 +201,8 @@ class Game:
 
         self.file_dialog = None
         self.control_surf.fill(self.manager.ui_theme.get_colour(None, None, 'dark_bg'))
-        self.game_mode_buttons = [self.stop_btn, self.kill_btn]
-        self.paint_mode_buttons = [self.start_btn, self.paint_btn, self.erase_btn, self.new_checkpoint, self.reset_population]
+        # self.game_mode_buttons = [self.stop_btn, self.kill_btn]
+        # self.paint_mode_buttons =[]# [self.start_btn, self.paint_btn, self.erase_btn, self.new_checkpoint, self.reset_population]
         # self.load_mode_buttons = [self.save_button, self.load_button]
 
     def paint_mode(self):
@@ -300,17 +305,18 @@ class Game:
                 if event.ui_element == self.kill_btn:
                     self.simulation.kill_all()
                 elif event.ui_element == self.reset_population:
-                    self.simulation.reset_population()
-                elif event.ui_element == self.stop_btn:
-                    # self.simulation.reset_population()
-                    self.simulation.kill_all()
+                    print('here')
                     self._stop_simulation = True
-                    self.paint_mode()
-                elif event.ui_element == self.start_btn:
-                    if self._stop_simulation:
-                        self.game_mode()
-                        self._stop_simulation = False
-                        self.simulation.start_generation()
+                # elif event.ui_element == self.stop_btn:
+                #     # self.simulation.reset_population()
+                #     self.simulation.kill_all()
+                #     self._stop_simulation = True
+                #     self.paint_mode()
+                # elif event.ui_element == self.start_btn:
+                #     if self._stop_simulation:
+                #         self.game_mode()
+                #         self._stop_simulation = False
+                #         self.simulation.start_generation()
 
                 elif event.ui_element == self.paint_btn:
                     self.selected_press_mode = PaintMode.DRAW
@@ -388,7 +394,13 @@ f"""
     def update_simul(self):
         self.simulation.update()
 
-        if not self.simulation.generation_over or self._stop_simulation:
+        if self._stop_simulation:
+            self._stop_simulation = False
+            self.simulation.reset_population()
+            self.simulation.start_generation()
+            return
+
+        if not self.simulation.generation_over:
             return
 
         self.simulation.reproduce()
