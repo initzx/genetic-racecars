@@ -72,7 +72,8 @@ class Game:
     def _init_surfs(self):
         self.display_surf = pygame.display.set_mode(self.size, pygame.HWSURFACE | pygame.DOUBLEBUF)
         self.simul_surf = pygame.Surface(self.map_config.map.get_size())
-        self.control_surf = pygame.Surface((self.display_surf.get_width() - self.simul_surf.get_width(), self.simul_surf.get_height()))
+        self.control_surf = pygame.Surface(
+            (self.display_surf.get_width() - self.simul_surf.get_width(), self.simul_surf.get_height()))
 
     def _init_simul(self):
         self.simulation = Simulation(self.simul_surf, self.neat_config, self.map_config)
@@ -93,10 +94,10 @@ class Game:
                                                      tool_tip_text='Dræb alle biler og start en ny generation'
                                                      )
         self.reset_population = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((1070, 30), (100, 30)),
-                                                     text='Genstart',
-                                                     manager=self.manager,
-                                                     tool_tip_text='Dræb alle biler og start populationen om igen'
-                                                     )
+                                                             text='Genstart',
+                                                             manager=self.manager,
+                                                             tool_tip_text='Dræb alle biler og start populationen om igen'
+                                                             )
         # self.stop_btn = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((850, 70), (100, 30)),
         #                                              text='Stop',
         #                                              manager=self.manager,
@@ -118,84 +119,90 @@ class Game:
                                                            tool_tip_text='Tilføj en ny checkpoint ved at klikke på 2 forskellige steder på banen, højre-klik for at annullere'
                                                            )
 
+        self.clear_checkpoints = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((1180, 30), (120, 30)),
+                                                              text='Slet alle CPs',
+                                                              manager=self.manager,
+                                                              tool_tip_text='Slet alle checkpoints undtagen start og slut'
+                                                              )
+
         pygame_gui.elements.UILabel(pygame.Rect((860, 120),
                                                 (150, 19)),
                                     'Bil styringer',
                                     self.manager)
 
         self.friction_slider = pygame_gui.elements.UIHorizontalSlider(
-                                                                    pygame.Rect((850, 150), (180, 30)),
-                                                                    default_map_config.car_config['friction'],
-                                                                    (0, 2),
-                                                                    self.manager)
+            pygame.Rect((850, 150), (180, 30)),
+            default_map_config.car_config['friction'],
+            (0, 2),
+            self.manager)
         pygame_gui.elements.UILabel(pygame.Rect((860, 153),
-                                                                                (150, 19)),
-                                                                                'Friktion',
-                                                                                self.manager)
+                                                (150, 19)),
+                                    'Friktion',
+                                    self.manager)
 
         self.accel_slider = pygame_gui.elements.UIHorizontalSlider(
-                                                                    pygame.Rect((850, 180), (180, 30)),
-                                                                    default_map_config.car_config['acceleration'],
-                                                                    (0, 9),
-                                                                    self.manager)
+            pygame.Rect((850, 180), (180, 30)),
+            default_map_config.car_config['acceleration'],
+            (0, 9),
+            self.manager)
         pygame_gui.elements.UILabel(pygame.Rect((860, 183),
-                                                                                (150, 19)),
-                                                                                'Acceleration',
-                                                                                self.manager)
+                                                (150, 19)),
+                                    'Acceleration',
+                                    self.manager)
 
         self.speed_slider = pygame_gui.elements.UIHorizontalSlider(
-                                                                    pygame.Rect((850, 210), (180, 30)),
-                                                                    default_map_config.car_config['max_speed'],
-                                                                    (1, 9),
-                                                                    self.manager)
+            pygame.Rect((850, 210), (180, 30)),
+            default_map_config.car_config['max_speed'],
+            (1, 9),
+            self.manager)
         pygame_gui.elements.UILabel(pygame.Rect((860, 213),
-                                                                                (150, 19)),
-                                                                                'Maks hastighed',
-                                                                                self.manager)
+                                                (150, 19)),
+                                    'Maks hastighed',
+                                    self.manager)
 
         self.steering_slider = pygame_gui.elements.UIHorizontalSlider(
-                                                                    pygame.Rect((850, 240), (180, 30)),
-                                                                    default_map_config.car_config['steering'],
-                                                                    (0, 20),
-                                                                    self.manager)
+            pygame.Rect((850, 240), (180, 30)),
+            default_map_config.car_config['steering'],
+            (0, 20),
+            self.manager)
         pygame_gui.elements.UILabel(pygame.Rect((860, 243),
-                                                                                (150, 19)),
-                                                                                'Drejningsevne',
-                                                                                self.manager)
+                                                (150, 19)),
+                                    'Drejningsevne',
+                                    self.manager)
 
         self.look_slider = pygame_gui.elements.UIHorizontalSlider(
-                                                                    pygame.Rect((850, 270), (180, 30)),
-                                                                    default_map_config.car_config['look'],
-                                                                    (0, 600),
-                                                                    self.manager)
+            pygame.Rect((850, 270), (180, 30)),
+            default_map_config.car_config['look'],
+            (0, 600),
+            self.manager)
         pygame_gui.elements.UILabel(pygame.Rect((860, 273),
-                                                                                (150, 19)),
-                                                                                'Syn afstand',
-                                                                                self.manager)
+                                                (150, 19)),
+                                    'Syn afstand',
+                                    self.manager)
 
         pygame_gui.elements.UILabel(pygame.Rect((1060, 120),
                                                 (150, 19)),
                                     'Simulation settings',
                                     self.manager)
         self.pop_size_slider = pygame_gui.elements.UIHorizontalSlider(
-                                            pygame.Rect((1050, 150), (180, 30)),
-                                            default_map_config.pop_size,
-                                            (2, 100),
-                                            self.manager)
+            pygame.Rect((1050, 150), (180, 30)),
+            default_map_config.pop_size,
+            (2, 100),
+            self.manager)
         self.pop_size_label = pygame_gui.elements.UILabel(pygame.Rect((1060, 153),
-                                                                                (150, 19)),
-                                                                                f'Biler: {default_map_config.pop_size}',
-                                                                                self.manager)
+                                                                      (150, 19)),
+                                                          f'Biler: {default_map_config.pop_size}',
+                                                          self.manager)
 
         self.max_loop_time = pygame_gui.elements.UIHorizontalSlider(
-                                            pygame.Rect((1050, 180), (180, 30)),
-                                            default_map_config.max_loop_time,
-                                            (1, 100),
-                                            self.manager)
+            pygame.Rect((1050, 180), (180, 30)),
+            default_map_config.max_loop_time,
+            (1, 100),
+            self.manager)
         self.max_loop_time_label = pygame_gui.elements.UILabel(pygame.Rect((1060, 183),
-                                                                                (150, 19)),
-                                                                                f'Gen. tid: {default_map_config.max_loop_time}',
-                                                                                self.manager)
+                                                                           (150, 19)),
+                                                               f'Gen. tid: {default_map_config.max_loop_time}',
+                                                               self.manager)
 
         self.selected_press_mode = None
 
@@ -220,6 +227,7 @@ class Game:
             b.disable()
         for b in self.game_mode_buttons:
             b.enable()
+
     #     for b in self.load_mode_buttons:
     #         b.disable()
     #
@@ -329,13 +337,14 @@ class Game:
 
                 elif event.ui_element == self.new_checkpoint:
                     self.selected_press_mode = PaintMode.CHECKPOINT
-
+                elif event.ui_element == self.clear_checkpoints:
+                    default_map_config.checkpoints['checkpoints'] = {}
                 # elif event.ui_element == self.load_button:
                 #     self.load_map()
                 # elif event.ui_element == self.save_button:
                 #     self.save_map('./tracks/test.png')
 
-                    # self.disable_load_mode_buttons()
+                # self.disable_load_mode_buttons()
             elif event.user_type == pygame_gui.UI_HORIZONTAL_SLIDER_MOVED:
                 if event.ui_element == self.friction_slider:
                     default_map_config.car_config['friction'] = self.friction_slider.get_current_value()
@@ -373,16 +382,16 @@ class Game:
             self.stats.kill()
 
         self.stats = pygame_gui.elements.UITextBox(
-f"""
+            f"""
 <b>Generation: {stats['generation']}</b>
 <br>
 <p>Bedste point: {stats['max']:.0f}</p>
 <p>Bedste point nogensinde: {stats['max_all_time']:.0f}</p>
 <p>Population gennemsnit: {stats['avg']:.0f}</p>
 """,
-                  pygame.Rect((850, 300), (250, 200)),
-                  manager=self.manager,
-                  object_id="#text_box_2")
+            pygame.Rect((850, 300), (250, 200)),
+            manager=self.manager,
+            object_id="#text_box_2")
         # print(stats)
 
     def draw_surfaces(self):
