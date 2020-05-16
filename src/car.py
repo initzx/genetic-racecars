@@ -101,9 +101,12 @@ class Car(pygame.sprite.Sprite):
 
         goals_to_go = self.checkpoints_reached ^ set(checkpoints)
         for goal in goals_to_go:
-            if intersect(car_line, checkpoints[goal]['coords']):
-                self.checkpoints_reached.add(goal)
-                self.genome.fitness += checkpoints[goal]['points']
+            try:
+                if intersect(car_line, checkpoints[goal]['coords']):
+                    self.checkpoints_reached.add(goal)
+                    self.genome.fitness += checkpoints[goal]['points']
+            except:
+                pass
 
     def _AI_control(self):
         f, l, r = self.simulation.sensor_check_on_track(self.rect.center, self.direction, self.conf['look']).values()
