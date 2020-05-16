@@ -45,7 +45,7 @@ class Game:
     def __init__(self):
 
         self.display_surf = None
-        self.size = self.width, self.height = 1500, 600
+        self.size = self.width, self.height = 1300, 600
         self.clock = pygame.time.Clock()
         self.start = time.time()
         self.last_press_pos = None
@@ -82,18 +82,18 @@ class Game:
     def _init_controls(self):
         # self.side_menu = SideMenu(self)
         self.manager = pygame_gui.UIManager(self.display_surf.get_size())
-        HelpText(pygame.Rect((850, 30), (600, 400)), self.manager)
+        HelpText(pygame.Rect((50, 30), (600, 400)), self.manager)
         # self.start_btn = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((850, 30), (100, 30)),
         #                                               text='Start',
         #                                               manager=self.manager,
         #                                               tool_tip_text='Start simulationen'
         #                                               )
-        self.kill_btn = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((960, 30), (100, 30)),
+        self.kill_btn = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((990, 30), (100, 30)),
                                                      text='Dræb alle',
                                                      manager=self.manager,
                                                      tool_tip_text='Dræb alle biler og start en ny generation'
                                                      )
-        self.reset_population = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((1070, 30), (100, 30)),
+        self.reset_population = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((1110, 30), (100, 30)),
                                                              text='Genstart',
                                                              manager=self.manager,
                                                              tool_tip_text='Dræb alle biler og start populationen om igen'
@@ -103,23 +103,23 @@ class Game:
         #                                              manager=self.manager,
         #                                              tool_tip_text='Stop simulationen øjeblikkeligt'
         #                                              )
-        self.paint_btn = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((960, 70), (100, 30)),
+        self.paint_btn = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((990, 70), (100, 30)),
                                                       text='Tegn bane',
                                                       manager=self.manager,
                                                       tool_tip_text='Banen tegnes ved at trække musen over dele af simulationen'
                                                       )
-        self.erase_btn = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((1070, 70), (100, 30)),
+        self.erase_btn = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((1110, 70), (100, 30)),
                                                       text='Slet bane',
                                                       manager=self.manager,
                                                       tool_tip_text='Banen slettes ved at trække musen over dele af simulationen'
                                                       )
-        self.new_checkpoint = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((1180, 70), (120, 30)),
+        self.new_checkpoint = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((850, 30), (120, 30)),
                                                            text='Ny Checkpoint',
                                                            manager=self.manager,
                                                            tool_tip_text='Tilføj en ny checkpoint ved at klikke på 2 forskellige steder på banen, højre-klik for at annullere'
                                                            )
 
-        self.clear_checkpoints = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((1180, 30), (120, 30)),
+        self.clear_checkpoints = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((850, 70), (120, 30)),
                                                               text='Slet alle CPs',
                                                               manager=self.manager,
                                                               tool_tip_text='Slet alle checkpoints undtagen start og slut'
